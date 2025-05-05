@@ -8,4 +8,5 @@ public interface IClientsService
     Task<List<ClientTripDTO>> GetTrips(int clientId);
     Task<int> AddClientAsync(Client client);
     Task<string> AddRegistrationAsync(int IdClient, int IdTrip);
+    Task<bool> DeleteRegistrationAsync(int IdClient, int IdTrip);
 }

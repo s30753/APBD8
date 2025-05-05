@@ -126,6 +126,18 @@ SELECT SCOPE_IDENTITY();";
                 var existingTrip = await cmd.ExecuteScalarAsync();
                 if (existingTrip == null) return "Trip not found";
             }
+            
+            // query checks whether given client has been already registered for a given trip (in such case registration
+            //again would violate the primary keys conditions)
+            command = "SELECT COUNT(*) FROM Client_Trip WHERE IdClient = @IdClient AND IdTrip = @IdTrip";
+            using (SqlCommand cmd = new SqlCommand(command, conn))
+            {
+                cmd.Parameters.AddWithValue("@IdClient", IdClient);
+                cmd.Parameters.AddWithValue("@IdTrip", IdTrip);
+
+                var count = (int)await cmd.ExecuteScalarAsync();
+                if (count != 0) return "such a trip has been already registered";
+            }
 
             var numOfParticipants = 0;
             // query gets the number of clients already registered on the given trip (number of records with the given
@@ -159,6 +171,34 @@ VALUES (@IdTrip, @IdClient, @RegisteredAt);";
                 
                 await cmd.ExecuteNonQueryAsync();
                 return "Client registered for a trip successfully";
+            }
+        }
+    }
+
+    public async Task<bool> DeleteRegistrationAsync(int IdClient, int IdTrip)
+    {
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        {
+            await conn.OpenAsync();
+            
+            string command = "SELECT COUNT(*) FROM Client_Trip WHERE IdClient = @IdClient AND IdTrip = @IdTrip";
+            
+            using (SqlCommand cmd = new SqlCommand(command, conn))
+            {
+                cmd.Parameters.AddWithValue("@IdClient", IdClient);
+                cmd.Parameters.AddWithValue("@IdTrip", IdTrip);
+
+                var count = (int)await cmd.ExecuteScalarAsync(); 
+                if (count != 1) return false;
+            }
+
+            command = "DELETE FROM Client_Trip WHERE IdClient = @IdClient AND IdTrip = @IdTrip";
+            using (SqlCommand cmd = new SqlCommand(command, conn))
+            {
+                cmd.Parameters.AddWithValue("@IdClient", IdClient);
+                cmd.Parameters.AddWithValue("@IdTrip", IdTrip);
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                return rowsAffected == 1;
             }
         }
     }

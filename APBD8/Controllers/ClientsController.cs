@@ -33,18 +33,20 @@ public class ClientsController : ControllerBase
         return Ok(id);
     }
 
-    [HttpPut("{IdClient}/trips/{IdTrip}")]
-    public async Task<IActionResult> AddRegistration([FromRoute] int IdClient, [FromRoute] int IdTrip)
+    [HttpPut("{id}/trips/{tripId}")]
+    public async Task<IActionResult> AddRegistration([FromRoute] int id, [FromRoute] int tripId)
     {
-        var msg = await _clientsService.AddRegistrationAsync(IdClient, IdTrip);
+        var msg = await _clientsService.AddRegistrationAsync(id, tripId);
         if (msg == "Client not found" || msg == "Trip not found") return NotFound(msg);
-        if (msg == "Maximum number of participants reached") return Conflict(msg);
+        if (msg == "Maximum number of participants reached" || msg == "such a trip has been already registered") return Conflict(msg);
         return Ok(msg);
     }
 
     [HttpDelete("{id}/trips/{tripId}")]
-    public async Task<IActionResult> DeleteTrip(int tripId)
+    public async Task<IActionResult> DeleteTrip([FromRoute] int id, [FromRoute] int tripId)
     {
-        return Ok();
+        var successful = await _clientsService.DeleteRegistrationAsync(id, tripId);
+        if (!successful) return NotFound("This client has not been registered for this trip");
+        return Ok("successfully deleted registration");
     }
 }
