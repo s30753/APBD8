@@ -181,6 +181,7 @@ VALUES (@IdTrip, @IdClient, @RegisteredAt);";
         {
             await conn.OpenAsync();
             
+            // query checks whether there's a registration in Client_Trip table with a given id of client and id of trip
             string command = "SELECT COUNT(*) FROM Client_Trip WHERE IdClient = @IdClient AND IdTrip = @IdTrip";
             
             using (SqlCommand cmd = new SqlCommand(command, conn))
@@ -192,6 +193,7 @@ VALUES (@IdTrip, @IdClient, @RegisteredAt);";
                 if (count != 1) return false;
             }
 
+            // query deletes the row with the registration of a given client to a given trip
             command = "DELETE FROM Client_Trip WHERE IdClient = @IdClient AND IdTrip = @IdTrip";
             using (SqlCommand cmd = new SqlCommand(command, conn))
             {
