@@ -15,6 +15,7 @@ public class TripsService : ITripsService
     {
         var trips = new List<TripDTO>();
 
+        // query gets all trips and information about the country of the trip
         string command = @"
 SELECT t.IdTrip, t.Name, t.Description, t.DateFrom, t.DateTo, t.MaxPeople, c.IdCountry, c.Name AS Country 
 FROM Trip t JOIN  Country_Trip ct ON t.IdTrip = ct.IdTrip JOIN Country c ON ct.IdCountry = c.IdCountry";

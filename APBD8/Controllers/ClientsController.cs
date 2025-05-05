@@ -16,6 +16,7 @@ public class ClientsController : ControllerBase
         _clientsService = clientsService;
     }
 
+    // gets trips for a given client
     [HttpGet("{id}/trips")]
     public async Task<IActionResult> GetClientTrips(int id)
     {
@@ -24,16 +25,21 @@ public class ClientsController : ControllerBase
         return Ok(clientTrips);
     }
 
+    // inserts new client
     [HttpPost]
-    public async Task<IActionResult> AddTrip([FromBody] Trip trip)
+    public async Task<IActionResult> AddClient([FromBody] Client client)
     {
-        return Ok(trip);
+        var id = await _clientsService.AddClientAsync(client);
+        return Ok(id);
     }
 
-    [HttpPut("{id}/trips/{tripId}")]
-    public async Task<IActionResult> UpdateTrip(int tripId, [FromBody] Trip trip)
+    [HttpPut("{IdClient}/trips/{IdTrip}")]
+    public async Task<IActionResult> AddRegistration([FromRoute] int IdClient, [FromRoute] int IdTrip)
     {
-        return Ok(trip);
+        var msg = await _clientsService.AddRegistrationAsync(IdClient, IdTrip);
+        if (msg == "Client not found" || msg == "Trip not found") return NotFound(msg);
+        if (msg == "Maximum number of participants reached") return Conflict(msg);
+        return Ok(msg);
     }
 
     [HttpDelete("{id}/trips/{tripId}")]
